@@ -49,9 +49,10 @@ public class Server {
         router.post().handler(BodyHandler.create());
 
         router.post("/api/v1/play").handler(ctx -> {
-            logger.debug("Play...");
-            readBody(ctx, PlayInput.class).flatMap(in ->
-                    core.playNow(in.hash, in.index, in.streaming))
+            readBody(ctx, PlayInput.class).flatMap(in -> {
+                logger.debug("Play... " + in.toString());
+                return core.playNow(in.hash, in.index, in.streaming);
+            })
                     .subscribeOn(Schedulers.io())
                     .subscribe(b -> ctx.response().end(), err -> {
                         logger.error("Error", err);
@@ -60,9 +61,9 @@ public class Server {
         });
 
         router.get("/api/v1/fetchFile").handler(ctx -> {
-            logger.debug("Fetch file...");
             var index = Integer.parseInt(ctx.request().getParam("index"));
             var hash = ctx.request().getParam("hash");
+            logger.debug("Fetch file... hash: " + hash + "index: " + index);
             core.download(hash, index).firstOrError()
                     .subscribeOn(Schedulers.io())
                     .cast(DownloadStarted.class)

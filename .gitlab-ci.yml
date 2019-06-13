@@ -1,0 +1,63 @@
+variables:
+  SBT_OPTS: "-Dsbt.global.base=sbt-cache/.sbtboot -Dsbt.boot.directory=sbt-cache/.boot -Dsbt.ivy.home=sbt-cache/.ivy"
+  DOCKER_HOST: "tcp://docker:2375"
+  # Improve performance with overlayfs.
+  DOCKER_DRIVER: overlay2
+
+cache:
+  key: $CI_COMMIT_REF_SLUG # caching per branch
+  untracked: true
+  paths:
+    - "sbt-cache/.ivy.cache"
+    - "sbt-cache/.boot"
+    - "sbt-cache/.sbtboot"
+    - "sbt-cache/target"
+
+stages:
+  - test
+  - build
+
+test:
+  stage: test
+  image: "hseeberger/scala-sbt:11.0.2_2.12.8_1.2.8"
+  services:
+    - docker:18-dind
+  script:
+    - sbt 'set test in assembly := {}' clean assembly
+  artifacts:
+    paths:
+    - build
+    expire_in: 1 days
+
+build_x86:
+  stage: build
+  image: "docker:18"
+  services:
+   - name: docker:18-dind
+     command: ["--experimental"]
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - cp -r dht_web/ build/
+    - cd build/
+    - docker build -f Dockerfile_x86 --platform linux/amd64 --pull -t $CI_REGISTRY/darkdarker/tuapse-play/x86:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY/darkdarker/tuapse-play/x86
+  only:
+    - master
+
+build_arm32v7:
+  stage: build
+  image: "docker:18"
+  services:
+   - name: docker:18-dind
+     command: ["--experimental"]
+
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - cp -r dht_web/ build/
+    - cd build/
+    - docker build -f Dockerfile_arm32v7 --platform linux/arm/v7 --pull -t $CI_REGISTRY/darkdarker/tuapse-play/arm32v7:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY/darkdarker/tuapse-play/arm32v7
+  only:
+    - master

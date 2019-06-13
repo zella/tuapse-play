@@ -14,4 +14,13 @@ public class PlayInput {
         this.index = index;
         this.streaming = streaming;
     }
+
+    @Override
+    public String toString() {
+        return "PlayInput{" +
+                "hash='" + hash + '\'' +
+                ", index=" + index +
+                ", streaming='" + streaming + '\'' +
+                '}';
+    }
 }
