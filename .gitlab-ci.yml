@@ -37,8 +37,7 @@ build_x86:
      command: ["--experimental"]
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-  script:
-    - cp -r dht_web/ build/
+  script: 
     - cd build/
     - docker build -f Dockerfile_x86 --platform linux/amd64 --pull -t $CI_REGISTRY/darkdarker/tuapse-play/x86:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY/darkdarker/tuapse-play/x86
@@ -55,7 +54,6 @@ build_arm32v7:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - cp -r dht_web/ build/
     - cd build/
     - docker build -f Dockerfile_arm32v7 --platform linux/arm/v7 --pull -t $CI_REGISTRY/darkdarker/tuapse-play/arm32v7:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY/darkdarker/tuapse-play/arm32v7
