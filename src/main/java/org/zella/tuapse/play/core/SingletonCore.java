@@ -54,7 +54,7 @@ public class SingletonCore {
 
     //download file
     public Flowable<IDownload> download(String hash, int index) {
-        Single<IDownload> prefetch = torrent.fetchFiles(hash).map(files -> new DownloadStarted(files.get(hash).toPath()));
+        Single<IDownload> prefetch = torrent.fetchFiles(hash).map(files -> new DownloadStarted(files.get(index).toPath()));
         Single<IDownload> download = (torrent.downloadFile(hash, config.torrentsDir().resolve(hash), index)
                 .toSingleDefault(new DownloadCompleted()));
         return prefetch.concatWith(download)

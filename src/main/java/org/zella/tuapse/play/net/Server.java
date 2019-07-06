@@ -21,8 +21,10 @@ import org.zella.tuapse.play.model.net.PlayInput;
 import org.zella.tuapse.play.utils.Json;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
 
@@ -82,15 +84,29 @@ public class Server {
         });
 
         router.get("/api/v1/fetchFile").handler(ctx -> {
+            //TODO rewrite all
+            var isDone = new AtomicBoolean(false);
             var index = Integer.parseInt(ctx.request().getParam("index"));
             var hash = ctx.request().getParam("hash");
             logger.debug("Fetch file... hash: " + hash + "index: " + index);
-            core.download(hash, index).firstOrError()
+            core.download(hash, index)
                     .subscribeOn(Schedulers.io())
-                    .cast(DownloadStarted.class)
-                    .subscribe(f -> ctx.reroute("/files" + File.separator + config.torrentsDir().relativize(f.file)), err -> {
+                    .subscribe(ff -> {
+                        if (ff instanceof DownloadStarted) {
+                            var f = (DownloadStarted) ff;
+//                            var d = config.torrentsDir();
+//                            var path = Paths.get(hash).resolve(f.file);
+//                            var sdsd = f.file;
+                            isDone.set(true);
+                            //http://192.168.1.21:9800/files/28a179d3b86721b1db5c56e3b26834106dad15c5/Rus_Rock_Novog_2018_sevmakc_/004.%20%D0%9C%D1%83%D0%BC%D0%B8%D0%B9%20%D0%A2%D1%80%D0%BE%D0%BB%D0%BB%D1%8C%20-%20%D0%A1%20%D0%9D%D0%BE%D0%B2%D1%8B%D0%BC%20%D0%B3%D0%BE%D0%B4%D0%BE%D0%BC,%20%D0%BA%D1%80%D0%BE%D1%88%D0%BA%D0%B0!.mp3
+//                            ctx.response().end();
+                            ctx.reroute("/files/" + Paths.get(hash).resolve(f.file));
+                        }
+
+                    }, err -> {
                         logger.error("Error", err);
-                        ctx.fail(err);
+                        if (!isDone.get())
+                            ctx.fail(err);
                     });
         });
         //TODO remove it if v1 working good
