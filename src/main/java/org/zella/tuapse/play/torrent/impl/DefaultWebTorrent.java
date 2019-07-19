@@ -21,7 +21,7 @@ public class DefaultWebTorrent implements IWebTorrentCli {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultWebTorrent.class);
 
-    private static final String WEB_TORR_DELIMTER = ":";
+    private static final String WEB_TORR_DELIMTER = "<:>";
 
 
     private final String execPath;

@@ -1,18 +1,17 @@
 package org.zella.tuapse.play.model.net;
 
+import io.reactivex.annotations.Nullable;
+
 public class PlayInput {
 
     public String hash;
-    public int index;
+    @Nullable
+    public Integer index;
+    @Nullable
+    public String path;
     public String streaming;
 
     public PlayInput() {
-    }
-
-    public PlayInput(String hash, int index, String streaming) {
-        this.hash = hash;
-        this.index = index;
-        this.streaming = streaming;
     }
 
     @Override
@@ -20,6 +19,7 @@ public class PlayInput {
         return "PlayInput{" +
                 "hash='" + hash + '\'' +
                 ", index=" + index +
+                ", path=" + path +
                 ", streaming='" + streaming + '\'' +
                 '}';
     }

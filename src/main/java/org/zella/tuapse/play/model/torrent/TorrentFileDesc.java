@@ -20,7 +20,11 @@ public class TorrentFileDesc {
     }
 
     public Path toPath() {
-        return Paths.get(String.join(File.separator, paths));
+        return Paths.get(toStringPath());
+    }
+
+    public String toStringPath() {
+        return String.join(File.separator, paths);
     }
 
     public String toHumanText() {
